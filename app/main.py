@@ -1,8 +1,8 @@
-# main.py
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from app.workflow import run_workflow
+from typing import List, Dict, Any
 
 app = FastAPI()
 
@@ -15,14 +15,20 @@ app.add_middleware(
 )
 
 class QueryRequest(BaseModel):
-    node_id: str
+    node_ids: List[str]
     user_query: str
+    api_keys: Dict[str, Any]
 
 @app.get("/")
-def test():
-    return {"message":"working"}
+def health_check():
+    return {"status": "OK"}
 
 @app.post("/query")
 async def handle_query(req: QueryRequest):
-    result = run_workflow(req.node_id, req.user_query)
-    return {"result": result}
+    try:
+        result = run_workflow(req.node_ids, req.user_query, req.api_keys)
+        return {"result": result["current_output"]}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
