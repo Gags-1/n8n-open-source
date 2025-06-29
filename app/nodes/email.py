@@ -7,10 +7,11 @@ def email_node(state: State) -> State:
     if not state.get("current_output"):
         raise ValueError("No content to email from previous node")
 
-    email_config = state["email_config"]
+    email_config = state["api_keys"]["email_config"]  # ✅ Fixed here
+
     msg = MIMEMultipart()
     msg.attach(MIMEText(state["current_output"], "plain"))
-    msg["Subject"] = "Workflow Output"  # Customize as needed
+    msg["Subject"] = "Workflow Output"
     msg["From"] = email_config["from_email"]
     msg["To"] = email_config["to_email"]
 
