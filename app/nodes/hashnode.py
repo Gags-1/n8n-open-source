@@ -5,6 +5,10 @@ def hashnode_node(state: State) -> State:
     if not state.get("current_output"):
         raise ValueError("No content to publish from previous node")
 
+    # Access keys from inside 'api_keys'
+    hashnode_token = state["api_keys"]["hashnode_token"]
+    publication_id = state["api_keys"]["hashnode_publication_id"]
+
     query = """
     mutation CreateDraft($input: CreateDraftInput!) {
       createDraft(input: $input) {
@@ -20,13 +24,13 @@ def hashnode_node(state: State) -> State:
         "input": {
             "title": "AI Generated Post",
             "contentMarkdown": state["current_output"],
-            "publicationId": state["hashnode_publication_id"],
+            "publicationId": publication_id,
             "slug": "ai-generated-post"
         }
     }
 
     headers = {
-        "Authorization": state["hashnode_token"],
+        "Authorization": hashnode_token,
         "Content-Type": "application/json"
     }
 
