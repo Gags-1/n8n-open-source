@@ -9,6 +9,8 @@ from app.nodes.gemini_advanced import gemini_advanced_node
 from app.nodes.db_unified import DatabaseNode
 from app.nodes.mongodb import mongodb_node
 from app.nodes.postgresql import postgresql_node
+from app.nodes.text_node import text_download_node
+
 
 node_registry = {
     "openai": openai_node,
@@ -21,7 +23,8 @@ node_registry = {
     "webhook": webhook_node,
     "database/execute": DatabaseNode.execute,
     "mongodb": mongodb_node,
-    "postgresql": postgresql_node
+    "postgresql": postgresql_node,
+    "text": text_download_node
     
 
 }
