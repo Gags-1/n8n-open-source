@@ -1,4 +1,4 @@
-from langgraph.graph import StateGraph, START, END
+from langgraph.graph.graph import START, END
 from app.models.state import State
 from app.core.node_registry import node_registry
 from typing import Dict, Any, Optional
