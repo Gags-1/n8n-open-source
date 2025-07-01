@@ -4,14 +4,6 @@ from app.models.state import State
 
 
 def postgresql_node(state: State) -> State:
-    """
-    Executes PostgreSQL queries. Configure via node_params:
-    {
-        "query": "SELECT * FROM table WHERE condition",
-        "parameters": [],  # For parameterized queries
-        "transaction": True/False
-    }
-    """
     params = state.get("node_params", {}).get("postgresql", {})
     conn = psycopg2.connect(
         state["api_keys"]["postgres_uri"],
