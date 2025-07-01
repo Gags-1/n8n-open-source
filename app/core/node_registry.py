@@ -6,9 +6,7 @@ from app.nodes.claude import claude_node
 from app.nodes.gemini import gemini_node
 from app.nodes.webhook import webhook_node
 from app.nodes.gemini_advanced import gemini_advanced_node
-from app.nodes.db_unified import DatabaseNode
 from app.nodes.mongodb import mongodb_node
-from app.nodes.postgresql import postgresql_node
 from app.nodes.text_node import text_download_node
 
 
