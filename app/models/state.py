@@ -3,16 +3,13 @@ from typing import TypedDict, Optional, Dict, Any, Union, List
 class State(TypedDict):
     user_query: str
     current_output: Optional[Union[str, Dict, List]]
-    workflow_id: Optional[str]  # For tracking
+    workflow_id: Optional[str]
+    api_keys: Dict[str, str]
     
+    # Node-specific parameters (for Swagger testing)
+    node_params: Optional[Dict[str, Dict[str, Any]]]  # New field for Swagger
     
-    api_keys: Dict[str, str] 
-    # # Node-specific configurations
-    # llm_config: Optional[Dict[str, Any]] 
-    # http_config: Optional[Dict[str, Any]] 
-    # file_output: Optional[Dict[str, str]] 
-    
-    #Legacy nodes (might delete)
+    # Legacy fields (deprecated but kept for compatibility)
     openai_api_key: Optional[str]
     hashnode_token: Optional[str]
     hashnode_publication_id: Optional[str]
