@@ -1,4 +1,3 @@
-from langgraph.graph.graph import START, END
 from langgraph.graph import StateGraph
 from app.models.state import State
 from app.core.node_registry import node_registry
@@ -16,26 +15,34 @@ def run_workflow(
             raise ValueError(f"Invalid node ID: {nid}")
 
     # Build graph
-    graph_builder = StateGraph(State)
+    workflow = StateGraph(State)
+    
+    # Add nodes
     for nid in node_ids:
-        # Pass node_params to each node if they exist
         node_func = lambda state, nid=nid: node_registry[nid](
             state, 
             **(node_params.get(nid, {}) if node_params else {}
         ))
-        graph_builder.add_node(nid, node_func)
+        workflow.add_node(nid, node_func)
     
-    graph_builder.add_edge(START, node_ids[0])
+    # Set entry point
+    workflow.set_entry_point(node_ids[0])
+    
+    # Create linear workflow
     for i in range(len(node_ids)-1):
-        graph_builder.add_edge(node_ids[i], node_ids[i+1])
-    graph_builder.add_edge(node_ids[-1], END)
-
+        workflow.add_edge(node_ids[i], node_ids[i+1])
+    
+    # Set finish point
+    workflow.set_finish_point(node_ids[-1])
+    
+    # Initialize state
     _state: State = {
         "user_query": user_query,
         "current_output": None,
         "api_keys": api_keys,
-        "node_params": node_params or {}  
+        "node_params": node_params or {}
     }
 
-    graph = graph_builder.compile()
-    return graph.invoke(_state)
+    # Compile and execute
+    app = workflow.compile()
+    return app.invoke(_state)
