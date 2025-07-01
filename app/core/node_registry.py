@@ -19,9 +19,7 @@ node_registry = {
     "gemini": gemini_node ,
     "gemini/advanced": gemini_advanced_node ,
     "webhook": webhook_node,
-    "database/execute": DatabaseNode.execute,
     "mongodb": mongodb_node,
-    "postgresql": postgresql_node,
     "text": text_download_node
     
 
