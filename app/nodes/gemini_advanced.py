@@ -1,13 +1,21 @@
 import google.generativeai as genai
 from app.models.state import State
 from typing import Optional, Dict, Literal
+from importlib.metadata import version  # Modern alternative to pkg_resources
 
 SUPPORTED_MODELS = {
     "gemini-1.5-flash": "gemini-1.5-flash",
     "gemini-1.5-pro": "gemini-1.5-pro",
-    "gemini-2.5-flash": "gemini-2.5-flash",
-    "gemini-2.5-pro": "gemini-2.5-pro"
+    "gemini-1.0-pro": "gemini-1.0-pro"
 }
+
+def _supports_system_instruction() -> bool:
+    """Check if SDK supports system_instruction parameter"""
+    try:
+        sdk_version = version('google-generativeai')
+        return tuple(map(int, sdk_version.split('.'))) >= (0, 3, 0)
+    except:
+        return False
 
 def gemini_advanced_node(
     state: State,
@@ -34,37 +42,41 @@ def gemini_advanced_node(
     # Prepare input
     final_prompt = user_prompt or state.get("user_query", "")
     if context:
-        final_prompt = f"Context: {context}\n\nQuestion: {final_prompt}"
+        final_prompt = f"Context: {context}\n\n{final_prompt}"
 
-    # Initialize model
-    model_config = {
-        "generation_config": {
-            "temperature": temperature,
-        }
+    generation_config = {
+        "temperature": temperature,
+        **({"max_output_tokens": max_output_tokens} if max_output_tokens else {})
     }
-    
-    if max_output_tokens:
-        model_config["generation_config"]["max_output_tokens"] = max_output_tokens
-    
-    if system_instruction:
-        model_config["system_instruction"] = system_instruction
-    
-    if safety_settings:
-        model_config["safety_settings"] = safety_settings
 
-    model = genai.GenerativeModel(model, **model_config)
-
-    # Generate response
-    try:
+    if _supports_system_instruction() and system_instruction:
+   
+        model = genai.GenerativeModel(
+            model_name=model,
+            generation_config=generation_config,
+            system_instruction=system_instruction,
+            safety_settings=safety_settings
+        )
         response = model.generate_content(final_prompt)
-        state["current_output"] = response.text
-        state["gemini_metadata"] = {
-            "model": model,
-            "prompt_feedback": getattr(response, 'prompt_feedback', None),
-            "usage_metadata": getattr(response, 'usage_metadata', None)
-        }
-    except Exception as e:
-        state["error"] = f"Gemini API error: {str(e)}"
-        raise
+    else:
+
+        if system_instruction:
+            final_prompt = f"[System Instruction]\n{system_instruction}\n\n{final_prompt}"
+        
+        model = genai.GenerativeModel(
+            model_name=model,
+            generation_config=generation_config,
+            safety_settings=safety_settings
+        )
+        response = model.generate_content(final_prompt)
+
+    # Store results
+    state["current_output"] = response.text
+    state["gemini_metadata"] = {
+        "model": model,
+        "prompt_feedback": getattr(response, 'prompt_feedback', None),
+        "usage_metadata": getattr(response, 'usage_metadata', None),
+        "implementation": "native" if _supports_system_instruction() else "legacy"
+    }
 
     return state

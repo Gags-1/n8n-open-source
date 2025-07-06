@@ -6,8 +6,7 @@ class State(TypedDict):
     workflow_id: Optional[str]
     api_keys: Dict[str, str]
     
-    # Node-specific parameters (for Swagger testing)
-    node_params: Optional[Dict[str, Dict[str, Any]]]  # New field for Swagger
+    node_params: Optional[Dict[str, Dict[str, Any]]]
     
     # Legacy fields (deprecated but kept for compatibility)
     openai_api_key: Optional[str]
