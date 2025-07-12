@@ -1,3 +1,4 @@
+# openai_advanced.py
 from typing import Optional, Dict
 from openai import OpenAI
 from app.models.state import State
@@ -12,29 +13,31 @@ SUPPORTED_MODELS = [
 
 def openai_advanced_node(state: State, **params) -> State:
     try:
-        # Initialize client with API key
-        client = OpenAI(
-            api_key=state["api_keys"].get("openai") or params.get("api_key")
-        )
+        # Safely initialize client without any unexpected kwargs
+        client_params = {
+            'api_key': state["api_keys"].get("openai") or params.get("api_key")
+        }
+        
+        # Filter out None values to avoid passing empty params
+        client_params = {k: v for k, v in client_params.items() if v is not None}
+        
+        client = OpenAI(**client_params)
         
         # Prepare messages
         messages = []
         
-        # Add system message if provided
         if params.get("system_instruction"):
             messages.append({
                 "role": "system",
                 "content": params["system_instruction"]
             })
             
-        # Add context if provided
         if params.get("context"):
             messages.append({
                 "role": "assistant",
                 "content": params["context"]
             })
             
-        # Add user query
         messages.append({
             "role": "user",
             "content": params.get("user_prompt") or state.get("user_query", "")
@@ -51,7 +54,6 @@ def openai_advanced_node(state: State, **params) -> State:
             presence_penalty=params.get("presence_penalty", 0)
         )
         
-        # Update state with response
         state["current_output"] = response.choices[0].message.content
         return state
         
