@@ -6,8 +6,7 @@
       "use": "@vercel/python",
       "config": {
         "maxLambdaSize": "15mb",
-        "runtime": "python3.9",
-        "suppressProxyWarning": true
+        "runtime": "python3.9"
       }
     }
   ],
@@ -18,10 +17,7 @@
     }
   ],
   "env": {
-    "PYTHONUNBUFFERED": "1",
     "NO_PROXY": "*",
-    "HTTP_PROXY": "",
-    "HTTPS_PROXY": "",
-    "OPENAI_API_DISABLE_PROXY": "true"
+    "PYTHONUNBUFFERED": "1"
   }
 }

@@ -1,6 +1,6 @@
 # openai_advanced.py
-from typing import Optional, Dict
-from openai import OpenAI
+import requests
+import json
 from app.models.state import State
 
 SUPPORTED_MODELS = [
@@ -13,15 +13,7 @@ SUPPORTED_MODELS = [
 
 def openai_advanced_node(state: State, **params) -> State:
     try:
-        # Safely initialize client without any unexpected kwargs
-        client_params = {
-            'api_key': state["api_keys"].get("openai") or params.get("api_key")
-        }
-        
-        # Filter out None values to avoid passing empty params
-        client_params = {k: v for k, v in client_params.items() if v is not None}
-        
-        client = OpenAI(**client_params)
+        api_key = state["api_keys"].get("openai") or params.get("api_key")
         
         # Prepare messages
         messages = []
@@ -43,18 +35,29 @@ def openai_advanced_node(state: State, **params) -> State:
             "content": params.get("user_prompt") or state.get("user_query", "")
         })
         
-        # Create completion
-        response = client.chat.completions.create(
-            model=params.get("model", "gpt-3.5-turbo"),
-            messages=messages,
-            temperature=params.get("temperature", 0.7),
-            max_tokens=params.get("max_tokens"),
-            top_p=params.get("top_p", 1.0),
-            frequency_penalty=params.get("frequency_penalty", 0),
-            presence_penalty=params.get("presence_penalty", 0)
+        # Make direct API call
+        response = requests.post(
+            "https://api.openai.com/v1/chat/completions",
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {api_key}"
+            },
+            json={
+                "model": params.get("model", "gpt-3.5-turbo"),
+                "messages": messages,
+                "temperature": params.get("temperature", 0.7),
+                "max_tokens": params.get("max_tokens"),
+                "top_p": params.get("top_p", 1.0),
+                "frequency_penalty": params.get("frequency_penalty", 0),
+                "presence_penalty": params.get("presence_penalty", 0)
+            },
+            timeout=30
         )
         
-        state["current_output"] = response.choices[0].message.content
+        if response.status_code != 200:
+            raise Exception(f"OpenAI API Error: {response.text}")
+        
+        state["current_output"] = response.json()["choices"][0]["message"]["content"]
         return state
         
     except Exception as e:
