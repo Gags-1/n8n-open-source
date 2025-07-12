@@ -1,15 +1,17 @@
-from fpdf import FPDF
-from app.models.state import State
+from PyPDF2 import PdfWriter
+import io
+from app.models import State
 
 def pdf_node(state: State, **params) -> State:
-    pdf = FPDF()
-    pdf.add_page()
-    pdf.set_font("Arial", size=12)
-    pdf.multi_cell(0, 10, str(state["current_output"]))
+    writer = PdfWriter()
+    writer.add_blank_page(width=72*8.5, height=72*11)  # Letter size
     
-    pdf_output = pdf.output(dest='S').encode('latin1')
+    # Add text
+    packet = io.BytesIO()
+    writer.write(packet)
+    
     state["pdf"] = {
-        "content": pdf_output,
-        "filename": params.get("filename", "report.pdf")
+        "content": packet.getvalue(),
+        "filename": params.get("filename", "output.pdf")
     }
     return state
