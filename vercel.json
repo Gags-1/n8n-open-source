@@ -6,7 +6,8 @@
       "use": "@vercel/python",
       "config": {
         "maxLambdaSize": "15mb",
-        "runtime": "python3.9"
+        "runtime": "python3.9",
+        "includeFiles": ["app/**"]
       }
     }
   ],
@@ -18,6 +19,9 @@
     }
   ],
   "env": {
-    "PYTHONUNBUFFERED": "1"
+    "PYTHONUNBUFFERED": "1",
+    "NO_PROXY": "*",
+    "HTTP_PROXY": "",
+    "HTTPS_PROXY": ""
   }
 }
