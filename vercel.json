@@ -7,21 +7,21 @@
       "config": {
         "maxLambdaSize": "15mb",
         "runtime": "python3.9",
-        "includeFiles": ["app/**"]
+        "suppressProxyWarning": true
       }
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "app/main.py",
-      "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+      "dest": "app/main.py"
     }
   ],
   "env": {
     "PYTHONUNBUFFERED": "1",
     "NO_PROXY": "*",
     "HTTP_PROXY": "",
-    "HTTPS_PROXY": ""
+    "HTTPS_PROXY": "",
+    "OPENAI_API_DISABLE_PROXY": "true"
   }
 }
