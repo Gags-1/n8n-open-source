@@ -1,10 +1,10 @@
 from PyPDF2 import PdfWriter
 import io
-from app.models import State
+from app.models.state import State
 
 def pdf_node(state: State, **params) -> State:
     writer = PdfWriter()
-    writer.add_blank_page(width=72*8.5, height=72*11)  # Letter size
+    writer.add_blank_page(width=72*8.5, height=72*11)
     
     # Add text
     packet = io.BytesIO()
